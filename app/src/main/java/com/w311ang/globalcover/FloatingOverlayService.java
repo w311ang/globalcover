@@ -82,6 +82,22 @@ public class FloatingOverlayService extends Service {
         }
     }
 
+    /**
+     * 设置图片是否拉伸以覆盖整个屏幕
+     * @param stretch true 为非等比例拉伸（直接拉伸到屏幕大小），false 为等比例拉伸（保持图片比例且完整显示）
+     */
+    public void setImageStretch(boolean stretch) {
+        if (overlayImageView != null) {
+            if (stretch) {
+                // 拉伸到整个屏幕，可能会改变比例
+                overlayImageView.setScaleType(ImageView.ScaleType.FIT_XY);
+            } else {
+                // 默认行为：FIT_CENTER，保持图片比例且完整显示
+                overlayImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+            }
+        }
+    }
+
     @Override
     public void onDestroy() {
         super.onDestroy();

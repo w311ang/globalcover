@@ -14,6 +14,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import android.widget.Button;
 import android.widget.SeekBar;
+import android.widget.Switch;
+import android.widget.CompoundButton;
 import android.view.View;
 import java.io.IOException;
 
@@ -23,6 +25,9 @@ public class MainActivity extends AppCompatActivity {
     private FloatingOverlayService floatingService;
     private boolean isBound = false;
     private SeekBar alphaSeekBar;
+    private Button toggleStretchButton;
+    // 标识当前是否开启拉伸
+    private boolean isStretched = false;
 
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
@@ -62,16 +67,16 @@ public class MainActivity extends AppCompatActivity {
         startService(serviceIntent);
         bindService(serviceIntent, serviceConnection, BIND_AUTO_CREATE);
 
-        // 文件选择按钮，调用系统文件选择器选取图片
+        // 文件选择按钮
         Button selectImageButton = findViewById(R.id.btn_select_image);
         selectImageButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     openImageChooser();
                 }
-        });
+            });
 
-        // SeekBar 用于调节图片透明度（0~100，转换为[0,1]）
+        // SeekBar 用于调节透明度
         alphaSeekBar = findViewById(R.id.seekbar_alpha);
         alphaSeekBar.setProgress(50); // 默认50%透明度
         alphaSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -89,14 +94,25 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onStopTrackingTouch(SeekBar seekBar) {  }
             });
+
+        // 开关用于控制是否拉伸
+        final Switch stretchSwitch = findViewById(R.id.switch_stretch);
+        // 设置初始状态（false：不拉伸）
+        stretchSwitch.setChecked(false);
+        stretchSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if (isBound && floatingService != null) {
+                        floatingService.setImageStretch(isChecked);
+                    }
+                }
+            });
     }
 
-    // 调用系统文件选择器
     private void openImageChooser() {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("image/*");
-        // 可选：使用Intent.createChooser来显示选择器标题
         Intent chooser = Intent.createChooser(intent, "请选择图片");
         startActivityForResult(chooser, REQUEST_CODE_IMAGE);
     }
@@ -105,8 +121,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CODE_IMAGE && resultCode == RESULT_OK && data != null) {
             Uri imageUri = data.getData();
+            // 获取持久化权限（如果需要长期访问）
+            final int takeFlags = data.getFlags() & 
+                (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            getContentResolver().takePersistableUriPermission(imageUri, takeFlags);
+
             try {
-                // 获取选中的图片 Bitmap
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
                 if (isBound && floatingService != null) {
                     floatingService.updateImage(bitmap);

@@ -39,5 +39,13 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:max="100" />
+
+        <!-- 控制拉伸效果的开关 -->
+        <Switch
+            android:id="@+id/switch_stretch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="拉伸" />
     </LinearLayout>
 </LinearLayout>
