@@ -38,7 +38,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:max="100" />
+            android:max="80" />
 
         <!-- 控制拉伸效果的开关 -->
         <Switch

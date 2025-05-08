@@ -39,7 +39,7 @@ public class FloatingOverlayService extends Service {
         overlayImageView = new ImageView(this);
         // 注意：确保在 drawable 目录下有 default_image 图片资源，也可以自行更换为其他默认图片
         //overlayImageView.setImageResource(R.drawable.default_image);
-        //overlayImageView.setAlpha(0.5f);  // 默认50%透明度
+        overlayImageView.setAlpha(0.5f);  // 默认50%透明度
 
         // 根据 Android 版本选择悬浮窗类型
         int layoutFlag;
@@ -57,7 +57,6 @@ public class FloatingOverlayService extends Service {
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
             PixelFormat.TRANSLUCENT);
         params.gravity = Gravity.TOP;
-        params.alpha = 0.5f;
 
         // 添加悬浮窗到 WindowManager
         windowManager.addView(overlayImageView, params);
@@ -78,8 +77,9 @@ public class FloatingOverlayService extends Service {
      * @param alpha 透明度值
      */
     public void updateAlpha(float alpha) {
-        params.alpha = alpha;
-        windowManager.updateViewLayout(overlayImageView, params);
+        if (overlayImageView != null) {
+            overlayImageView.setAlpha(alpha);
+        }
     }
 
     /**
